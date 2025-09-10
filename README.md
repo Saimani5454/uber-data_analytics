@@ -1,92 +1,101 @@
-🚖 Uber Data Analytics Dashboard
+# 🚖 Uber Data Analytics Dashboard
 
-This repository hosts an advanced Streamlit web app for exploring Uber ride bookings. It features:
+![Dashboard Preview](images/dashboard_preview.png)
 
-Local file loading (with upload fallback).
+This repository hosts a fully interactive **Streamlit web app** for analyzing Uber ride data.  
+The dashboard includes:
 
-KPI summaries: Total Rides, Completed, Canceled, Average CTAT.
+- **Dynamic data filtering** by date, vehicle type, payment method, and booking status  
+- **Key Performance Indicators (KPIs)**: total rides, completed rides, cancelled rides, average CTAT  
+- **Visual insights**: monthly, daily, and hourly ride trends; vehicle type distribution; booking status breakdown; cancellation reasons; top pickup/drop locations  
+- **Raw data explorer** with CSV download option  
+- **Auto-generated PDF report** summarizing key metrics  
+- **Embedded Power BI PDF** (`Uber.pdf`) for additional visualization  
 
-Interactive visualizations: Trends by month, day, hour; vehicle types; booking status; cancellation reasons; pickup/drop locations.
+👉 **Live Demo**: [Open the Streamlit App](https://uber-dataanalytics-sai403da.streamlit.app/)
 
-Auto-generated PDF report with key insights from your data.
+---
 
-Embedded Power BI report (Uber.pdf), displayed and downloadable from within the app.
+## 📂 Repository Structure
 
-Live Demo
-
-Check it out live here:
-Uber Data Analytics Dashboard
- 
-uberdataanalysis-box3mi59jqezzxefndbxzn.streamlit.app
-
-Project Structure
 uber-data-analytics/
-├── app.py                   # Streamlit application
-├── requirements.txt         # Dependencies
-├── ncr_ride_bookings.csv    # Dataset (local or upload)
-├── Uber.pdf                 # Embedded Power BI visualization
-└── README.md                # This documentation
+├── app.py # Streamlit dashboard with analytics & PDF features
+├── requirements.txt # Dependencies for deployment
+├── ncr_ride_bookings.csv # Dataset (for analytics)
+├── Uber.pdf # Power BI report (embedded in dashboard)
+├── images/ # Screenshots for README
+└── README.md # Project documentation
 
-Getting Started
-Run Locally
+yaml
+Copy code
 
-Clone the repository:
+---
 
-git clone https://github.com/<your-username>/uber-data-analytics.git
-cd uber-data-analytics
+## 🚀 Run Locally
 
-
+1. Clone the repo:  
+   ```bash
+   git clone https://github.com/<your-username>/uber-data-analytics.git
+   cd uber-data-analytics
 Install dependencies:
 
+bash
+Copy code
 pip install -r requirements.txt
-
-
 Launch the app:
 
+bash
+Copy code
 streamlit run app.py
+Open http://localhost:8501 in your browser 🎉
 
+🌐 Deploy on Streamlit Cloud
+Your app is already live at:
+👉 https://uber-dataanalytics-sai403da.streamlit.app/
 
-The app will open at http://localhost:8501
-.
+To update:
 
-Deploy to Streamlit Cloud
+Push changes to this repo.
 
-Push your repo to GitHub.
+Streamlit Cloud will automatically redeploy the latest version.
 
-Navigate to Streamlit Community Cloud
-.
+📊 Features Overview
+🔍 Filters
 
-Deploy the repo → your app will be hosted at something like:
+Select date range, vehicle type, payment method, and booking status.
 
-https://<your-username>-uber-data-analytics.streamlit.app
+📌 KPIs
 
-Features Overview
+Quick summary metrics for total rides, completed, cancelled, and avg CTAT.
 
-Filters: Date range, vehicle type, payment method, booking status.
+📈 Visualizations
 
-KPIs: Quickly view key metrics.
+Rides by month, day, and hour
 
-Visual analytics: Line charts, bar charts, pie charts for multiple dimensions of your data.
+Vehicle type distribution
 
-Raw Data Explorer: View and download filtered data.
+Booking status pie chart
 
-PDF Reports:
+Cancellation reason breakdown
 
-Auto-generated from filtered dataset.
+Top pickup & drop locations
 
-Embedded Power BI export (Uber.pdf).
+📄 Reports
 
-Requirements
+Auto-generated PDF report from dataset
+
+Embedded Power BI report (Uber.pdf) inside the app
+
+🛠 Requirements
+Dependencies listed in requirements.txt:
+
+txt
+Copy code
 streamlit
 pandas
 numpy
 matplotlib
 seaborn
 reportlab
-
-
-base64, os, and warnings are part of Python's standard library—no need to list them.
-
-License
-
-This project is provided for educational and analytical purposes only.
+📄 License
+This project is for educational and analytical purposes only.
