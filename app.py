@@ -3,7 +3,6 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
-import os
 import warnings
 
 warnings.filterwarnings('ignore')
@@ -13,45 +12,24 @@ warnings.filterwarnings('ignore')
 # ==============================
 st.set_page_config(page_title="Uber Data Analytics", page_icon="🚖", layout="wide")
 
-RAW_GITHUB_URL = "https://raw.githubusercontent.com/Saimani5454/uber-data_analytics/main/ncr_ride_bookings.csv"
-LOCAL_FILE = "ncr_ride_bookings.csv"
-
 # ==============================
-# LOAD DATA
+# LOAD DATA (LOCAL ONLY)
 # ==============================
 @st.cache_data
 def load_data():
-    df = None
-
-    # Try local file first
-    if os.path.exists(LOCAL_FILE):
-        df = pd.read_csv(LOCAL_FILE)
-    else:
-        try:
-            df = pd.read_csv(RAW_GITHUB_URL)
-        except Exception as e:
-            st.warning("⚠️ Could not load dataset automatically. Please upload your CSV below.")
-            uploaded_file = st.file_uploader("Upload Uber dataset (CSV)", type="csv")
-            if uploaded_file is not None:
-                df = pd.read_csv(uploaded_file)
-
-    if df is not None:
-        # Clean & enrich
-        df['Date'] = pd.to_datetime(df['Date'])
-        df['Time'] = pd.to_datetime(df['Time'])
-        df['Year'] = df['Date'].dt.year
-        df['Month'] = df['Date'].dt.month
-        df['Day'] = df['Date'].dt.day_name()
-        df['Hour'] = df['Time'].dt.hour
-        df['Payment Method'] = df['Payment Method'].fillna("Unknown")
-        df["Avg VTAT"] = df["Avg VTAT"].fillna(df["Avg VTAT"].mean())
-        df["Avg CTAT"] = df["Avg CTAT"].fillna(df["Avg CTAT"].mean())
+    df = pd.read_csv("ncr_ride_bookings.csv")  # Must be in same repo as app.py
+    df['Date'] = pd.to_datetime(df['Date'])
+    df['Time'] = pd.to_datetime(df['Time'])
+    df['Year'] = df['Date'].dt.year
+    df['Month'] = df['Date'].dt.month
+    df['Day'] = df['Date'].dt.day_name()
+    df['Hour'] = df['Time'].dt.hour
+    df['Payment Method'] = df['Payment Method'].fillna("Unknown")
+    df["Avg VTAT"] = df["Avg VTAT"].fillna(df["Avg VTAT"].mean())
+    df["Avg CTAT"] = df["Avg CTAT"].fillna(df["Avg CTAT"].mean())
     return df
 
 df = load_data()
-
-if df is None:
-    st.stop()
 
 # ==============================
 # SIDEBAR FILTERS
@@ -152,3 +130,4 @@ st.dataframe(df_filtered)
 
 csv = df_filtered.to_csv(index=False).encode('utf-8')
 st.download_button("📥 Download Filtered Data", data=csv, file_name="uber_filtered.csv", mime="text/csv")
+
