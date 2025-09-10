@@ -7,7 +7,7 @@ import io
 import warnings
 
 warnings.filterwarnings('ignore')
-st.set_option('deprecation.showPyplotGlobalUse', False)
+#st.set_option('deprecation.showPyplotGlobalUse', False)
 
 # ==============================
 # CONFIGURATION
