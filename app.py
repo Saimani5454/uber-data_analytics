@@ -3,59 +3,65 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
-import io
+import os
 import warnings
 
 warnings.filterwarnings('ignore')
-#st.set_option('deprecation.showPyplotGlobalUse', False)
 
 # ==============================
-# CONFIGURATION
+# CONFIG
 # ==============================
-st.set_page_config(
-    page_title="Uber Data Analytics",
-    page_icon="🚖",
-    layout="wide"
-)
+st.set_page_config(page_title="Uber Data Analytics", page_icon="🚖", layout="wide")
+
+RAW_GITHUB_URL = "https://raw.githubusercontent.com/Saimani5454/uber-data_analytics/main/ncr_ride_bookings.csv"
+LOCAL_FILE = "ncr_ride_bookings.csv"
 
 # ==============================
 # LOAD DATA
 # ==============================
-DATA_URL = "ncr_ride_bookings.csv"
-
 @st.cache_data
 def load_data():
-    df = pd.read_csv(DATA_URL)
-    df['Date'] = pd.to_datetime(df['Date'])
-    df['Time'] = pd.to_datetime(df['Time'])
-    df['Year'] = df['Date'].dt.year
-    df['Month'] = df['Date'].dt.month
-    df['Day'] = df['Date'].dt.day_name()
-    df['Hour'] = df['Time'].dt.hour
-    df['Payment Method'] = df['Payment Method'].fillna("Unknown")
-    df["Avg VTAT"] = df["Avg VTAT"].fillna(df["Avg VTAT"].mean())
-    df["Avg CTAT"] = df["Avg CTAT"].fillna(df["Avg CTAT"].mean())
+    df = None
+
+    # Try local file first
+    if os.path.exists(LOCAL_FILE):
+        df = pd.read_csv(LOCAL_FILE)
+    else:
+        try:
+            df = pd.read_csv(RAW_GITHUB_URL)
+        except Exception as e:
+            st.warning("⚠️ Could not load dataset automatically. Please upload your CSV below.")
+            uploaded_file = st.file_uploader("Upload Uber dataset (CSV)", type="csv")
+            if uploaded_file is not None:
+                df = pd.read_csv(uploaded_file)
+
+    if df is not None:
+        # Clean & enrich
+        df['Date'] = pd.to_datetime(df['Date'])
+        df['Time'] = pd.to_datetime(df['Time'])
+        df['Year'] = df['Date'].dt.year
+        df['Month'] = df['Date'].dt.month
+        df['Day'] = df['Date'].dt.day_name()
+        df['Hour'] = df['Time'].dt.hour
+        df['Payment Method'] = df['Payment Method'].fillna("Unknown")
+        df["Avg VTAT"] = df["Avg VTAT"].fillna(df["Avg VTAT"].mean())
+        df["Avg CTAT"] = df["Avg CTAT"].fillna(df["Avg CTAT"].mean())
     return df
 
 df = load_data()
+
+if df is None:
+    st.stop()
 
 # ==============================
 # SIDEBAR FILTERS
 # ==============================
 st.sidebar.header("🔍 Filters")
-
-# Date filter
 min_date, max_date = df['Date'].min(), df['Date'].max()
 date_range = st.sidebar.date_input("Select Date Range", [min_date, max_date])
-
-# Vehicle filter
-vehicles = st.sidebar.multiselect("Select Vehicle Types", df['Vehicle Type'].unique(), default=df['Vehicle Type'].unique())
-
-# Payment method filter
-payments = st.sidebar.multiselect("Select Payment Methods", df['Payment Method'].unique(), default=df['Payment Method'].unique())
-
-# Booking status filter
-statuses = st.sidebar.multiselect("Select Booking Status", df['Booking Status'].unique(), default=df['Booking Status'].unique())
+vehicles = st.sidebar.multiselect("Vehicle Types", df['Vehicle Type'].unique(), default=df['Vehicle Type'].unique())
+payments = st.sidebar.multiselect("Payment Methods", df['Payment Method'].unique(), default=df['Payment Method'].unique())
+statuses = st.sidebar.multiselect("Booking Status", df['Booking Status'].unique(), default=df['Booking Status'].unique())
 
 # Apply filters
 df_filtered = df[
@@ -66,15 +72,15 @@ df_filtered = df[
 ]
 
 # ==============================
-# KPI METRICS
+# KPIs
 # ==============================
 st.title("🚖 Uber Data Analytics Dashboard")
 
 col1, col2, col3, col4 = st.columns(4)
 col1.metric("Total Rides", f"{len(df_filtered):,}")
-col2.metric("Completed Rides", df_filtered[df_filtered["Booking Status"] == "Completed"].shape[0])
-col3.metric("Cancelled Rides", df_filtered[df_filtered["Booking Status"].str.contains("Cancel")].shape[0])
-col4.metric("Avg. CTAT", f"{df_filtered['Avg CTAT'].mean():.2f} mins")
+col2.metric("Completed", df_filtered[df_filtered["Booking Status"] == "Completed"].shape[0])
+col3.metric("Cancelled", df_filtered[df_filtered["Booking Status"].str.contains("Cancel")].shape[0])
+col4.metric("Avg CTAT", f"{df_filtered['Avg CTAT'].mean():.2f} mins")
 
 # ==============================
 # VISUALIZATIONS
@@ -88,7 +94,6 @@ fig, ax = plt.subplots(figsize=(10, 5))
 sns.lineplot(x=months.index, y=months.values, marker='o', ax=ax)
 ax.set_xticks(range(1, 13))
 ax.set_xticklabels(['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'])
-ax.set_ylabel("Number of Rides")
 st.pyplot(fig)
 
 # --- Daily rides
@@ -96,7 +101,6 @@ st.subheader("Rides by Day of Week")
 days = df_filtered.groupby('Day').size().reindex(['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'])
 fig, ax = plt.subplots(figsize=(10, 5))
 sns.barplot(x=days.index, y=days.values, palette='viridis', ax=ax)
-ax.set_ylabel("Number of Rides")
 st.pyplot(fig)
 
 # --- Hourly rides
@@ -105,7 +109,6 @@ hours = df_filtered.groupby('Hour').size()
 fig, ax = plt.subplots(figsize=(10, 5))
 sns.lineplot(x=hours.index, y=hours.values, marker='o', ax=ax)
 ax.set_xticks(range(0, 24))
-ax.set_ylabel("Number of Rides")
 st.pyplot(fig)
 
 # --- Vehicle Type
@@ -113,18 +116,15 @@ st.subheader("Rides per Vehicle Type")
 vehicle = df_filtered['Vehicle Type'].value_counts()
 fig, ax = plt.subplots(figsize=(8, 5))
 sns.barplot(x=vehicle.values, y=vehicle.index, palette='Blues_r', ax=ax)
-ax.set_xlabel("Number of Rides")
 st.pyplot(fig)
 
 # --- Pickup & Drop Locations
 st.subheader("Top Pickup & Drop Locations")
 col1, col2 = st.columns(2)
 with col1:
-    top_pick = df_filtered['Pickup Location'].value_counts().head(5)
-    st.bar_chart(top_pick)
+    st.bar_chart(df_filtered['Pickup Location'].value_counts().head(5))
 with col2:
-    top_drop = df_filtered['Drop Location'].value_counts().head(5)
-    st.bar_chart(top_drop)
+    st.bar_chart(df_filtered['Drop Location'].value_counts().head(5))
 
 # --- Booking Status
 st.subheader("Booking Status Distribution")
@@ -150,6 +150,5 @@ st.pyplot(fig)
 st.markdown("## 🔎 Explore Raw Data")
 st.dataframe(df_filtered)
 
-# Download option
 csv = df_filtered.to_csv(index=False).encode('utf-8')
 st.download_button("📥 Download Filtered Data", data=csv, file_name="uber_filtered.csv", mime="text/csv")
