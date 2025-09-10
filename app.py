@@ -21,7 +21,7 @@ st.set_page_config(
 # ==============================
 # LOAD DATA
 # ==============================
-DATA_URL = "https://raw.githubusercontent.com/Saimani5454/uber-data_analytics/main/ncr_ride_bookings.csv"
+DATA_URL = "ncr_ride_bookings.csv"
 
 @st.cache_data
 def load_data():
