@@ -4,20 +4,29 @@ import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
 import warnings
+import base64
+from reportlab.lib.pagesizes import A4
+from reportlab.pdfgen import canvas
 
 warnings.filterwarnings('ignore')
-
-# ==============================
-# CONFIG
-# ==============================
 st.set_page_config(page_title="Uber Data Analytics", page_icon="🚖", layout="wide")
 
 # ==============================
-# LOAD DATA (LOCAL ONLY)
+# LOAD DATA (LOCAL or UPLOAD)
 # ==============================
 @st.cache_data
 def load_data():
-    df = pd.read_csv("ncr_ride_bookings.csv")  # Must be in same repo as app.py
+    try:
+        df = pd.read_csv("ncr_ride_bookings.csv")
+    except FileNotFoundError:
+        uploaded = st.file_uploader("Upload your Uber dataset (CSV)", type="csv")
+        if uploaded is not None:
+            df = pd.read_csv(uploaded)
+        else:
+            st.warning("⚠️ Please upload `ncr_ride_bookings.csv` to continue.")
+            st.stop()
+
+    # Clean & enrich dataset
     df['Date'] = pd.to_datetime(df['Date'])
     df['Time'] = pd.to_datetime(df['Time'])
     df['Year'] = df['Date'].dt.year
@@ -30,6 +39,7 @@ def load_data():
     return df
 
 df = load_data()
+st.success("✅ Data loaded successfully!")
 
 # ==============================
 # SIDEBAR FILTERS
@@ -41,7 +51,6 @@ vehicles = st.sidebar.multiselect("Vehicle Types", df['Vehicle Type'].unique(), 
 payments = st.sidebar.multiselect("Payment Methods", df['Payment Method'].unique(), default=df['Payment Method'].unique())
 statuses = st.sidebar.multiselect("Booking Status", df['Booking Status'].unique(), default=df['Booking Status'].unique())
 
-# Apply filters
 df_filtered = df[
     (df['Date'].between(pd.to_datetime(date_range[0]), pd.to_datetime(date_range[1]))) &
     (df['Vehicle Type'].isin(vehicles)) &
@@ -55,10 +64,15 @@ df_filtered = df[
 st.title("🚖 Uber Data Analytics Dashboard")
 
 col1, col2, col3, col4 = st.columns(4)
-col1.metric("Total Rides", f"{len(df_filtered):,}")
-col2.metric("Completed", df_filtered[df_filtered["Booking Status"] == "Completed"].shape[0])
-col3.metric("Cancelled", df_filtered[df_filtered["Booking Status"].str.contains("Cancel")].shape[0])
-col4.metric("Avg CTAT", f"{df_filtered['Avg CTAT'].mean():.2f} mins")
+total_rides = len(df_filtered)
+completed_rides = df_filtered[df_filtered["Booking Status"] == "Completed"].shape[0]
+cancelled_rides = df_filtered[df_filtered["Booking Status"].str.contains("Cancel")].shape[0]
+avg_ctat = df_filtered['Avg CTAT'].mean()
+
+col1.metric("Total Rides", f"{total_rides:,}")
+col2.metric("Completed", completed_rides)
+col3.metric("Cancelled", cancelled_rides)
+col4.metric("Avg CTAT", f"{avg_ctat:.2f} mins")
 
 # ==============================
 # VISUALIZATIONS
@@ -131,3 +145,38 @@ st.dataframe(df_filtered)
 csv = df_filtered.to_csv(index=False).encode('utf-8')
 st.download_button("📥 Download Filtered Data", data=csv, file_name="uber_filtered.csv", mime="text/csv")
 
+# ==============================
+# PDF REPORT
+# ==============================
+def generate_pdf(total, completed, cancelled, avg_ctat):
+    pdf_file = "uber_report.pdf"
+    c = canvas.Canvas(pdf_file, pagesize=A4)
+    width, height = A4
+
+    c.setFont("Helvetica-Bold", 18)
+    c.drawCentredString(width/2, height - 50, "🚖 Uber Data Analytics Report")
+
+    c.setFont("Helvetica", 12)
+    c.drawString(50, height - 100, "This report provides insights into Uber ride bookings dataset.")
+
+    c.setFont("Helvetica", 11)
+    c.drawString(50, height - 140, f"Total Rides: {total:,}")
+    c.drawString(50, height - 160, f"Completed Rides: {completed}")
+    c.drawString(50, height - 180, f"Cancelled Rides: {cancelled}")
+    c.drawString(50, height - 200, f"Avg CTAT: {avg_ctat:.2f} mins")
+
+    c.showPage()
+    c.save()
+    return pdf_file
+
+st.markdown("## 📄 Generate PDF Report")
+pdf_file = generate_pdf(total_rides, completed_rides, cancelled_rides, avg_ctat)
+
+with open(pdf_file, "rb") as f:
+    pdf_bytes = f.read()
+
+st.download_button("📥 Download Uber Report (PDF)", data=pdf_bytes, file_name="uber_report.pdf", mime="application/pdf")
+
+base64_pdf = base64.b64encode(pdf_bytes).decode('utf-8')
+pdf_display = f'<iframe src="data:application/pdf;base64,{base64_pdf}" width="100%" height="600" type="application/pdf"></iframe>'
+st.markdown(pdf_display, unsafe_allow_html=True)
