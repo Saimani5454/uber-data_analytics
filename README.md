@@ -97,5 +97,6 @@ numpy
 matplotlib
 seaborn
 reportlab
+
 📄 License
 This project is for educational and analytical purposes only.
