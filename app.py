@@ -7,6 +7,7 @@ import warnings
 import base64
 from reportlab.lib.pagesizes import A4
 from reportlab.pdfgen import canvas
+import os
 
 warnings.filterwarnings('ignore')
 st.set_page_config(page_title="Uber Data Analytics", page_icon="🚖", layout="wide")
@@ -146,7 +147,7 @@ csv = df_filtered.to_csv(index=False).encode('utf-8')
 st.download_button("📥 Download Filtered Data", data=csv, file_name="uber_filtered.csv", mime="text/csv")
 
 # ==============================
-# PDF REPORT
+# PDF REPORT (Auto-generated from dataset)
 # ==============================
 def generate_pdf(total, completed, cancelled, avg_ctat):
     pdf_file = "uber_report.pdf"
@@ -169,7 +170,7 @@ def generate_pdf(total, completed, cancelled, avg_ctat):
     c.save()
     return pdf_file
 
-st.markdown("## 📄 Generate PDF Report")
+st.markdown("## 📄 Auto-Generated PDF Report")
 pdf_file = generate_pdf(total_rides, completed_rides, cancelled_rides, avg_ctat)
 
 with open(pdf_file, "rb") as f:
@@ -180,3 +181,19 @@ st.download_button("📥 Download Uber Report (PDF)", data=pdf_bytes, file_name=
 base64_pdf = base64.b64encode(pdf_bytes).decode('utf-8')
 pdf_display = f'<iframe src="data:application/pdf;base64,{base64_pdf}" width="100%" height="600" type="application/pdf"></iframe>'
 st.markdown(pdf_display, unsafe_allow_html=True)
+
+# ==============================
+# POWER BI PDF INTEGRATION
+# ==============================
+st.markdown("## 📊 Power BI Dashboard (Uber.pdf)")
+
+if os.path.exists("Uber.pdf"):
+    with open("Uber.pdf", "rb") as f:
+        pb_pdf = f.read()
+    st.download_button("📥 Download Power BI Report (Uber.pdf)", data=pb_pdf, file_name="Uber.pdf", mime="application/pdf")
+
+    base64_pdf = base64.b64encode(pb_pdf).decode('utf-8')
+    pdf_display = f'<iframe src="data:application/pdf;base64,{base64_pdf}" width="100%" height="600" type="application/pdf"></iframe>'
+    st.markdown(pdf_display, unsafe_allow_html=True)
+else:
+    st.warning("⚠️ Power BI file `Uber.pdf` not found. Please place it in the app folder.")
