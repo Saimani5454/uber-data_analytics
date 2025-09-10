@@ -1,50 +1,92 @@
-# uber-data_analytics
+🚖 Uber Data Analytics Dashboard
 
-**Project Overview**
-This script, written in Python, demonstrates a comprehensive data wrangling workflow for Uber ride bookings data. It provides steps for missing value imputation, categorical value mapping, and date-time processing—crucial phases in a real-world machine learning or analytics pipeline.
+This repository hosts an advanced Streamlit web app for exploring Uber ride bookings. It features:
 
-Main Features
-Data Loading & Exploration
+Local file loading (with upload fallback).
 
-Loads the dataset with Pandas and previews its structure and missing data.
+KPI summaries: Total Rides, Completed, Canceled, Average CTAT.
 
-Missing Data Handling
+Interactive visualizations: Trends by month, day, hour; vehicle types; booking status; cancellation reasons; pickup/drop locations.
 
-Fills missing numeric values with column means using SimpleImputer.
+Auto-generated PDF report with key insights from your data.
 
-Replaces missing values in specific columns with defaults (e.g., 0 for cancellation counts, 'Unknown' for reasons).
+Embedded Power BI report (Uber.pdf), displayed and downloadable from within the app.
 
-Categorical Feature Engineering
+Live Demo
 
-Encodes categorical features like booking status, vehicle type, payment method, and cancellation reasons into numeric codes using mapping.
+Check it out live here:
+Uber Data Analytics Dashboard
+ 
+uberdataanalysis-box3mi59jqezzxefndbxzn.streamlit.app
 
-Date-Time Processing
+Project Structure
+uber-data-analytics/
+├── app.py                   # Streamlit application
+├── requirements.txt         # Dependencies
+├── ncr_ride_bookings.csv    # Dataset (local or upload)
+├── Uber.pdf                 # Embedded Power BI visualization
+└── README.md                # This documentation
 
-Converts and combines separate date and time columns into a single datetime column for better temporal analysis.
+Getting Started
+Run Locally
 
-Exploratory Steps
+Clone the repository:
 
-Shows value counts, statistical summaries, and a correlation heatmap for initial exploration.
-
-Technologies Used
-Python (with NumPy and Pandas)
-
-Seaborn (for visualization)
-
-Scikit-learn (for imputation)
-
-Usage
-Ensure the dataset (ncr_ride_bookings.csv) is available in the correct directory.
-
-Run the script to:
-
-Preprocess, clean, and encode data, making it ready for further analytics or modeling.
-
-View exploratory results and formatted data output.
-
-Suitable For
-Data scientists and analysts preparing ride bookings data for analysis or machine learning.
-
-Learners practicing feature engineering and preprocessing with real-world datasets.
+git clone https://github.com/<your-username>/uber-data-analytics.git
+cd uber-data-analytics
 
 
+Install dependencies:
+
+pip install -r requirements.txt
+
+
+Launch the app:
+
+streamlit run app.py
+
+
+The app will open at http://localhost:8501
+.
+
+Deploy to Streamlit Cloud
+
+Push your repo to GitHub.
+
+Navigate to Streamlit Community Cloud
+.
+
+Deploy the repo → your app will be hosted at something like:
+
+https://<your-username>-uber-data-analytics.streamlit.app
+
+Features Overview
+
+Filters: Date range, vehicle type, payment method, booking status.
+
+KPIs: Quickly view key metrics.
+
+Visual analytics: Line charts, bar charts, pie charts for multiple dimensions of your data.
+
+Raw Data Explorer: View and download filtered data.
+
+PDF Reports:
+
+Auto-generated from filtered dataset.
+
+Embedded Power BI export (Uber.pdf).
+
+Requirements
+streamlit
+pandas
+numpy
+matplotlib
+seaborn
+reportlab
+
+
+base64, os, and warnings are part of Python's standard library—no need to list them.
+
+License
+
+This project is provided for educational and analytical purposes only.
